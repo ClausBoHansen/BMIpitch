@@ -3,37 +3,89 @@ ShinyBMI
 author:Claus Bo Hansen 
 date: 219-10-16
 autosize: true
+width: 1600
+height: 900
 
-First Slide
+<style>
+.small-code pre code {
+  font-size: 1em;
+}
+</style>
+
+Idea
 ========================================================
 
-For more details on authoring R presentations please visit <https://support.rstudio.com/hc/en-us/articles/200486468>.
+The idea of ShinyBMI is to make Body Mass Index (BMI) calculation available to everyone.  
+ShinyBMI will quickly provide you with your BMI without storing any of your personal information.
 
-- Bullet 1
-- Bullet 2
-- Bullet 3
+You can try out ShinyBMI for your self by visiting <https://clausbohansen.shinyapps.io/ShinyBMI/>  
 
-Slide With Code
+If you in a situation, where you can't access the online calculator, you can print this presentation.  
+It contains a diagram you can use to determine your BMI category.
+
+
+A code push-up
 ========================================================
+class: small-code
+
+To be able to plot the BMI classes for you, we need to prepare a little data frame with data to plot.
 
 
 ```r
-summary(cars)
+# Load libraries
+library(dplyr)
+library(ggplot2)
+
+# Define data frame for data to plot
+plotdata <- data.frame()
+
+# These are upper boundaries for each category
+BMIboundaries <- c('Very severely underweight' = 15,
+                  'Severely underweight' = 16,
+                  'Underweight' = 18.5,
+                  'Normal (healthy weight)' = 25,
+                  'Overweight' = 30,
+                  'Obese Class I (Moderately obese)' = 35,
+                  'Obese Class II (Severely obese)' = 40,
+                  'Obese Class III (Very severely obese)' = 45,
+                  'Obese Class IV (Morbidly Obese)' = 50,
+                  'Obese Class V (Super Obese)' = 60)
+
+# Calculate height for each class
+for (Weight in seq(0, 250, 5)){
+  for (i in 1:length(BMIboundaries)){
+    plotdata <- rbind(plotdata,
+      list(Weight = Weight,
+           Height = round(100*sqrt(Weight/BMIboundaries[i])),
+           Category = names(BMIboundaries[i])),
+        stringsAsFactors = FALSE)
+  }
+}
+
+# Remove unrealistic heights
+plotdata <- plotdata %>%
+  filter(Height <= 230)
 ```
 
-```
-     speed           dist       
- Min.   : 4.0   Min.   :  2.00  
- 1st Qu.:12.0   1st Qu.: 26.00  
- Median :15.0   Median : 36.00  
- Mean   :15.4   Mean   : 42.98  
- 3rd Qu.:19.0   3rd Qu.: 56.00  
- Max.   :25.0   Max.   :120.00  
-```
 
-Slide With Plot
+Printable BMI category boundaries for off-line use
 ========================================================
+class: small-code
+
+This little chuck gives you a BMI category chart:
+
+```r
+ggplot(plotdata, aes(x=Height, y=Weight, color=Category)) +
+  geom_line() +
+  labs(title="BMI Caterory upper boundaries", x = "Height in centimeters", y="Weight in kilograms")
+```
 
 ![plot of chunk unnamed-chunk-2](Pitch-figure/unnamed-chunk-2-1.png)
 
-test
+
+References
+========================================================
+
+Definition of BMI Classes  
+<https://en.wikipedia.org/wiki/Body_mass_index>
+
